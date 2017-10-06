@@ -2,9 +2,10 @@
 
 [Serverless](https://serverless.com/) Plugin to support running against [Localstack](https://github.com/localstack/localstack).
 
-This plugin allows any requests to AWS to be redirected to a running Localstack instance.
+This plugin allows any requests to AWS to be redirected to a running Localstack instance. It also supports a poller to consume messages
+off of a Kinesis stream.
 
-WARNING: This plugin is very much WIP
+WARNING: This plugin is very much a WIP
 
 Pre-requisites:
 * [Localstack](https://github.com/localstack/localstack)
@@ -79,7 +80,7 @@ ServerlessOfflineLocalstack.configureAWS(AWS);
 
 ## Localstack
 
-For full documentation, see https://bitbucket.org/atlassian/localstack
+For full documentation, see https://github.com/localstack/localstack
 
 #### Installing via PIP
 
@@ -118,3 +119,8 @@ custom:
   serverlessOfflineLocalstack:
     debug: true
 ```
+
+### The following projects were used as a guideline and their license should be followed as well:
+
+- https://github.com/temyers/serverless-localstack
+- https://github.com/DopplerLabs/serverless-plugin-offline-kinesis-events
