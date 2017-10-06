@@ -2,17 +2,24 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 
 import AbstractBaseClass from "./abstractBaseClass";
+import createLambdaContext from "./createLambdaContext";
 
 /**
  * Based on ServerlessWebpack.run
+ * @param serverless
  * @param slsWebpack
  * @param stats
  * @param functionName
  */
-function getRunnableLambda(slsWebpack, stats, functionName) {
+function getRunnableLambda(serverless, slsWebpack, stats, functionName) {
     return (event) => {
-        const handler = slsWebpack.loadHandler(stats, functionName, true);
-        const context = slsWebpack.getContext(functionName);
+        // need to setup env vars first
+        const originalEnvironment = _.extend({}, process.env);
+        process.env = _.extend({}, serverless.service.provider.environment, serverless.service.functions[functionName].environment, originalEnvironment);
+
+        const compileOutputPaths = slsWebpack.compileOutputPaths; // returns an array, but it should only be 1
+        const handler = require(compileOutputPaths[0])[functionName];
+        const context = createLambdaContext(serverless.service.functions[functionName]);
         return new Promise(
             (resolve, reject) => handler(
                 event,
@@ -56,7 +63,7 @@ export default class KinesisConsumer extends AbstractBaseClass {
             for (const s of streamEvents) {
                 const streamName = s.stream.arn.split('/').slice(-1)[0];
                 registry[streamName] = registry[streamName] || [];
-                registry[streamName].push(getRunnableLambda(slsWebpack, compileStats, functionName));
+                registry[streamName].push(getRunnableLambda(serverless, slsWebpack, compileStats, functionName));
             }
         }
         return registry;
@@ -87,7 +94,15 @@ export default class KinesisConsumer extends AbstractBaseClass {
             .flatMap(([name, result]) => {
                 // this.debug(`Stream '${name}' returned ${result.Records.length} records`);
                 // Parse the records
-                const records = _.map(result.Records, r => JSON.parse(r.Data.toString()));
+                const records = _.map(result.Records, r => {
+                    const data = r.Data;
+                    // try {
+                    //     return JSON.parse(data.toString())
+                    // } catch (err) {
+                    //     return data;
+                    // }
+                    return data;
+                });
                 // Apply the functions that use that stream
                 return registry[name].map(f => f({Records: records}));
             })
