@@ -10,22 +10,26 @@ class ServerlessOfflineLocalstackPlugin {
         this.serverless = serverless;
         this.options = options;
 
-        const localstack = new Localstack(serverless, options);
+        this.localstack = new Localstack(serverless, options);
 
         this.commands = {
             deploy: {}
         };
 
         this.hooks = {
-            'before:invoke:local:invoke': () => Promise.bind(localstack)
-                .then(localstack.reconfigureAWS),
-            'webpack:invoke:invoke': () => Promise.bind(localstack)
-                .then(localstack.reconfigureAWS),
-            'webpack:compile': () => Promise.bind(localstack)
-                .then(localstack.reconfigureAWS)
+            'before:invoke:local:invoke': () => Promise.bind(this.localstack)
+                .then(this.localstack.reconfigureAWS),
+            'webpack:invoke:invoke': () => Promise.bind(this.localstack)
+                .then(this.localstack.reconfigureAWS),
+            'webpack:compile': () => Promise.bind(this.localstack)
+                .then(this.localstack.reconfigureAWS),
+            'before:offline:start': () => Promise.bind(this.localstack)
+                .then(this.localstack.reconfigureAWS)
         };
+    }
 
-        localstack.reconfigureAWS();
+    static configureAWS(AWS) {
+        Localstack.configureAWS(AWS);
     }
 }
 

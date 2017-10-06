@@ -1,0 +1,4 @@
+example/
+spec/
+src/
+serverlessOfflineLocalstack.json

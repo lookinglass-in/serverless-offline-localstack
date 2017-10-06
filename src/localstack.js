@@ -7,6 +7,8 @@ const path = require('path');
 
 import AbstractBaseClass from "./abstractBaseClass";
 
+const configFilePath = 'node_modules/serverless-offline-localstack/serverlessOfflineLocalstack.json';
+
 export default class Localstack extends AbstractBaseClass {
 
     constructor(serverless, options) {
@@ -78,8 +80,7 @@ export default class Localstack extends AbstractBaseClass {
         this.debug('Final configuration: ' + JSON.stringify(configChanges));
         // configure the serverless aws sdk
         this.awsProvider.sdk.config.update(configChanges);
-        // configure the regular aws sdk
-        AWS.config.update(configChanges);
+        this.writeConfigs(configChanges);
     }
 
     loadEndpointsFromDisk(endpointFile) {
@@ -116,5 +117,20 @@ export default class Localstack extends AbstractBaseClass {
         }
 
         return this.awsProviderRequest(service, method, params);
+    }
+
+    static configureAWS(AWSp) {
+        const contents = fs.readFileSync(configFilePath);
+        let configChanges = JSON.parse(contents);
+        AWSp.config.update(configChanges);
+    }
+
+    writeConfigs(configChanges) {
+        fs.writeFile(configFilePath, JSON.stringify(configChanges), function (err) {
+                if (err) {
+                    throw err;
+                }
+            }
+        );
     }
 }
