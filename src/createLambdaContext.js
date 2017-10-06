@@ -28,4 +28,4 @@ export default function createLambdaContext(fun, cb) {
         identity: {},
         clientContext: {},
     };
-};
+}

@@ -5,7 +5,7 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
 
-import AbstractBaseClass from "./abstractBaseClass";
+import AbstractBaseClass from './abstractBaseClass';
 
 const configFilePath = 'node_modules/serverless-offline-localstack/serverlessOfflineLocalstack.json';
 

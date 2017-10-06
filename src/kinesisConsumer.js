@@ -1,8 +1,8 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
 
-import AbstractBaseClass from "./abstractBaseClass";
-import createLambdaContext from "./createLambdaContext";
+import AbstractBaseClass from './abstractBaseClass';
+import createLambdaContext from './createLambdaContext';
 
 /**
  * Based on ServerlessWebpack.run

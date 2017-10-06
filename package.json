@@ -2,16 +2,13 @@
   "name": "serverless-offline-localstack",
   "version": "0.0.1",
   "description": "",
-  "main": "./build/index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
-    "test": "jasmine",
-    "test_integration": "TMPDIR=/tmp jasmine --config=spec/support/jasmine_integration.json",
-    "test:watch": "nodemon -L -i spec/integrate ./node_modules/.bin/jasmine",
-    "test:cover": "jasmine --coverage",
-    "build:node": "cross-env BABEL_ENV=production babel src --out-dir build",
-    "build": "npm run lint && npm run test && npm run build:node"
+    "test": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
+    "build": "WEBPACK_ENV=build webpack",
+    "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch"
   },
   "repository": {
     "type": "git",
@@ -29,12 +26,13 @@
     "bluebird": "3.5.1"
   },
   "devDependencies": {
-    "babel-cli": "6.24.1",
+    "babel-cli": "6.26.0",
     "babel-core": "6.26.0",
     "babel-loader": "7.1.2",
     "babel-preset-env": "1.6.0",
     "babel-plugin-transform-runtime": "6.23.0",
     "eslint": "4.8.0",
+    "eslint-loader": "1.9.0",
     "jasmine": "2.8.0",
     "cross-env": "5.0.5",
     "chai": "4.1.2",
@@ -42,6 +40,8 @@
     "source-map-support": "0.5.0",
     "sinon": "4.0.1",
     "serverless": "1.23.0",
-    "fs-extra": "4.0.2"
+    "fs-extra": "4.0.2",
+      "webpack": "3.6.0",
+    "webpack-node-externals": "1.6.0"
   }
 }

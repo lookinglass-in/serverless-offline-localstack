@@ -1,9 +1,9 @@
 'use strict';
 
-import * as Promise from "bluebird";
+import * as Promise from 'bluebird';
 
-import Localstack from "./localstack";
-import KinesisConsumer from "./kinesisConsumer";
+import Localstack from './localstack';
+import KinesisConsumer from './kinesisConsumer';
 
 class ServerlessOfflineLocalstackPlugin {
 
