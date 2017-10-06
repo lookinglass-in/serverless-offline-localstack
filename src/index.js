@@ -21,9 +21,11 @@ class ServerlessOfflineLocalstackPlugin {
                 .then(localstack.reconfigureAWS),
             'webpack:invoke:invoke': () => Promise.bind(localstack)
                 .then(localstack.reconfigureAWS),
-            'before:offline:start': () => Promise.bind(localstack)
+            'webpack:compile': () => Promise.bind(localstack)
                 .then(localstack.reconfigureAWS)
         };
+
+        localstack.reconfigureAWS();
     }
 }
 

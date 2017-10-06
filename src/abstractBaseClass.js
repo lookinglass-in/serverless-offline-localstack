@@ -3,6 +3,11 @@ export default class AbstractBaseClass {
     constructor(serverless, options) {
         this.serverless = serverless;
         this.options = options;
+        this.isDebug = false;
+    }
+
+    setDebug(debug) {
+        this.isDebug = debug;
     }
 
     log(msg) {
@@ -10,7 +15,7 @@ export default class AbstractBaseClass {
     }
 
     debug(msg) {
-        if (this.config.debug) {
+        if (this.isDebug) {
             this.log(msg);
         }
     }

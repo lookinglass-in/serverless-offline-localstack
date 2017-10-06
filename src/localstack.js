@@ -5,7 +5,7 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
 
-import AbstractBaseClass from './abstractBaseClass';
+import AbstractBaseClass from "./abstractBaseClass";
 
 export default class Localstack extends AbstractBaseClass {
 
@@ -15,6 +15,7 @@ export default class Localstack extends AbstractBaseClass {
         this.log('Configuring serverless offline -> localstack');
 
         this.config = serverless.service.custom && serverless.service.custom.serverlessOfflineLocalstack || {};
+        super.setDebug(this.config.debug);
         this.endpoints = this.config.endpoints || {};
         this.endpointFile = this.config.endpointFile;
 
@@ -41,8 +42,11 @@ export default class Localstack extends AbstractBaseClass {
     }
 
     reconfigureAWS() {
-        console.log('dlkdf')
         const host = this.config.host;
+        const region = this.config.region || process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1';
+        const accessKeyId = this.config.accessKeyId || process.env.AWS_ACCESS_KEY_ID || 'none';
+        const secretAccessKey = this.config.secretAccessKey || process.env.AWS_SECRET_ACCESS_KEY || 'none';
+
         let configChanges = {};
 
         // If a host has been configured, override each service
@@ -66,8 +70,16 @@ export default class Localstack extends AbstractBaseClass {
             }
         }
 
+        // set additional required properties
+        configChanges['region'] = region;
+        configChanges['accessKeyId'] = accessKeyId;
+        configChanges['secretAccessKey'] = secretAccessKey;
+
+        this.debug('Final configuration: ' + JSON.stringify(configChanges));
+        // configure the serverless aws sdk
         this.awsProvider.sdk.config.update(configChanges);
-        console.log(this.awsProvider.sdk.config)
+        // configure the regular aws sdk
+        AWS.config.update(configChanges);
     }
 
     loadEndpointsFromDisk(endpointFile) {
