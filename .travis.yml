@@ -6,7 +6,8 @@ deploy:
   provider: npm
   email: travis@travisci.org
   skip_cleanup: true
-  script: npm run build
+  before_deploy:
+  - npm run build
   api_key:
     secure: iqaBYjHGtv8M7VpD4mY+ajO825d0Cop5qMM4SdSHBoKHHKiW9ZikW+5zDb26/7xVqScvqDWuTZnXF2UyuBt78v5dXj/kznn+pa+KnR+hBQ5eXKa/k3M1ProaKVk3TdOsw64o8FhPx/GZ0KaIya7whEEEG0F7Wdbh2346OIFBAy3sNI54ozTce6peLpttfQjuMqMhfh8fchvTKw2WkqweTINhSVCL1WC6labQ+QDIZ+O/UwLUg9f8yISyxvxT7WbPSFbS7u16vxThHwR8xzMpX8GhVDH7Vr2pQqQqQiwvkA2WJxDvRh/KOVeUa2moK4OutS6uLL6ubpZ4Yh+aIHOG8YeEB9/k3hKJYjLfi9/eUQZ5bI8c8xZjlW48KfIPYy4InTkLkdfPitGOOK/yfl9v8DmUcGqAbziyWoJagbxt5dHahp1ldXWIL9Cmesb80+NWY765g6TTRchutOZnVzvoeG6DJ18g7JO8PqJFMWwtIw7AVQpx/n0Jf1OIa2zZ8bLU3/V573dI0el49nHcrEODJFOBpdnQoNGIitRRRtqIGQB9L9O8o8azpCBA/0PM1BMpR/V32lg91ta1IWDv+zT6eAkDRqSYie7uKojp26c7EJV96RN6FOw9FYUh1JOL2Ir1VxL3gr5eFm5zqTqaiJfJfc3zqNgTLA+p+9TWvI4Y/D0=
   on:
