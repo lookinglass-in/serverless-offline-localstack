@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "6"
+
+deploy:
+  provider: npm
+  email: travis@travisci.org
+  api_key:
+    secure: MDrRHfQtqI2WKgPaQlstu3K70Y6TvuishEomhelE+AirXhji6c5fOxp4frAljUjZ4bVYrrVU9ukxoHrFJXfh1PC6pPYgUC9VtkCUado2YRhZqQXPoXYI9mqs/tcviyAZRTLsfCldGB7F2sfFxMPbnWAtO6eX9QP5NxTaT4A7vTaJoPoFyPHo7vejKCbwF1h0Am77pMnttn9deeyPrNxTdQTq9xwKKx9bWV9jyVM9cmB34ApZUKitn3rTSpi4GP0L7rzKt2aDaUxgV2nqemDD2yTw0dALf2EuedEc/Mtch5D+lTnemoO7piWLSIzPYxTkow65pkYbvsm0itGuCaeiYIKAVHGev6uB/6vp68vjYcSEgQvND2fnX8ukfz/LT8F1Vpz5PWPCwjtFturAXDhlgCgIGEOppJLD32b9N1OHtqM6h2+jB6jR9k4hvJDeo1gq94uIzvbYrUdK0GkSMxjZ4o7udl1sJpec0EAX0Bz1V5K5H/HseUFgcn0MqLmMpsc7oaW7TAIW6bedRYQ7x+xaexhzvlN10R6fT9kua7nurFeqKjr+6XE2SUM3He5jUh98M//vb6p/aCBBWKPF55Vev/dQ08pNrzj00IrpVT5U/sFEU3u2TkrQsv2J3xyU85/CFhaduyAEYPzDY+HyfNqgh2lTi95mo1kADkkkEy7Cuh0=
+  on:
+    branches:
+      only:
+      - master
