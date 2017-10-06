@@ -3,6 +3,7 @@
 import * as Promise from "bluebird";
 
 import Localstack from "./localstack";
+import KinesisConsumer from "./kinesisConsumer";
 
 class ServerlessOfflineLocalstackPlugin {
 
@@ -11,6 +12,7 @@ class ServerlessOfflineLocalstackPlugin {
         this.options = options;
 
         this.localstack = new Localstack(serverless, options);
+        this.kinesisConsumer = new KinesisConsumer(serverless, options);
 
         this.commands = {
             deploy: {}
@@ -21,10 +23,11 @@ class ServerlessOfflineLocalstackPlugin {
                 .then(this.localstack.reconfigureAWS),
             'webpack:invoke:invoke': () => Promise.bind(this.localstack)
                 .then(this.localstack.reconfigureAWS),
-            'webpack:compile': () => Promise.bind(this.localstack)
-                .then(this.localstack.reconfigureAWS),
-            'before:offline:start': () => Promise.bind(this.localstack)
-                .then(this.localstack.reconfigureAWS)
+            'before:offline:start': () => Promise.resolve(
+                Promise.bind(this.localstack).then(this.localstack.reconfigureAWS),
+            ).then(
+                Promise.bind(this.kinesisConsumer).then(this.kinesisConsumer.runWatcher)
+            )
         };
     }
 

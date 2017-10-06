@@ -1,8 +1,7 @@
-const lodash = require('lodash');
-const AWS = require('aws-sdk');
+const _ = require('lodash');
 const Promise = require('bluebird');
 
-import AbstractBaseClass from './abstractBaseClass';
+import AbstractBaseClass from "./abstractBaseClass";
 
 /**
  * Based on ServerlessWebpack.run
@@ -38,17 +37,9 @@ export default class KinesisConsumer extends AbstractBaseClass {
 
         this.log('Configuring serverless offline -> kinesis consumer');
 
+        this.awsProvider = serverless.getProvider('aws');
         this.config = serverless.service.custom && serverless.service.custom.serverlessOfflineLocalstack || {};
-        // Only meaningful for AWS
-        this.provider = 'aws';
-
-        // No commands to run
-        // TODO(msills): Allow this to be run independently
-        this.commands = {};
-        // Run automatically as part of the deploy
-        this.hooks = {
-            'after:offline:start': () => Promise.bind(this).then(this.runWatcher)
-        };
+        super.setDebug(this.config.debug);
     }
 
     static async createRegistry(serverless) {
@@ -72,10 +63,10 @@ export default class KinesisConsumer extends AbstractBaseClass {
     }
 
     static async _repollStreams(kinesis, streamIterators) {
-        winston.debug(`Polling Kinesis streams: ${JSON.stringify(_.keys(streamIterators))}`);
+        // this.debug(`Polling Kinesis streams: ${JSON.stringify(_.keys(streamIterators))}`);
         for (const name of _.keys(streamIterators)) {
             if (streamIterators[name] === null) {
-                winston.warn(`Iterator for stream '${name}' + is closed`);
+                // this.log(`Iterator for stream '${name}' + is closed`);
             }
         }
         // Get the new values for each stream
@@ -94,7 +85,7 @@ export default class KinesisConsumer extends AbstractBaseClass {
         await Promise.all(_.chain(streamResults)
             .entries()
             .flatMap(([name, result]) => {
-                winston.debug(`Stream '${name}' returned ${result.Records.length} records`);
+                // this.debug(`Stream '${name}' returned ${result.Records.length} records`);
                 // Parse the records
                 const records = _.map(result.Records, r => JSON.parse(r.Data.toString()));
                 // Apply the functions that use that stream
@@ -104,62 +95,60 @@ export default class KinesisConsumer extends AbstractBaseClass {
     }
 
     async runWatcher() {
-        // Create the Kinesis client
-        const config = this.serverless.service.custom.offlineKinesisEvents;
-        const kinesis = new AWS.Kinesis({
-            endpoint: `${config.host}:${config.port}`,
-            region: config.region,
-            apiVersion: '2013-12-02',
-            sslEnabled: config.sslEnabled || false
-        });
+        if (this.config.kinesis && this.config.kinesis.enabled) {
+            this.log('Enabling poller');
 
-        // Load the registry
-        const registry = await ServerlessOfflineKinesisEvents.createRegistry(this.serverless);
-        // Get the first shard for every element in the registry
-        // Right now, the stream iterators are local to this run. Eventually, we'll persist this somewhere
-        let streamIterators = await Promise.props(
-            _.chain(registry)
-            // Grab keys
-                .keys()
-                // Map to [name, stream description promise]
-                .map(name => [name, kinesis.describeStream({StreamName: name}).promise()])
-                // Map to [name, iterator promise]
-                .map(([name, descP]) => {
-                    const iterP = descP.then(desc => kinesis.getShardIterator({
-                        ShardId: desc.StreamDescription.Shards[0].ShardId,
-                        ShardIteratorType: 'TRIM_HORIZON',
-                        StreamName: name
-                    }).promise());
-                    return [name, iterP];
-                })
-                // Back to an object
-                .fromPairs()
-                // Extract iterators
-                .mapValues(iterP => iterP.then(iter => iter.ShardIterator))
-                // Grab the value
-                .value());
+            // Create the Kinesis client
+            const kinesis = new this.awsProvider.sdk.Kinesis();
 
-        let consecutiveErrors = 0;
-        while (true) { // eslint-disable-line no-constant-condition
-            winston.debug(`Polling Kinesis streams: ${JSON.stringify(_.keys(registry))}`);
-            // Repoll the streams
-            const streamResults = await ServerlessOfflineKinesisEvents._repollStreams(kinesis, streamIterators) // eslint-disable-line
-            try {
-                await ServerlessOfflineKinesisEvents._runLambdas(streamResults, registry) // eslint-disable-line
-            } catch (err) {
-                consecutiveErrors += 1;
-                if (consecutiveErrors > MAX_CONSECUTIVE_ERRORS) {
-                    winston.error(`Exceeded maximum number of consecutive errors (${MAX_CONSECUTIVE_ERRORS})`);
-                    throw err;
+            // Load the registry
+            const registry = await KinesisConsumer.createRegistry(this.serverless);
+            // Get the first shard for every element in the registry
+            // Right now, the stream iterators are local to this run. Eventually, we'll persist this somewhere
+            let streamIterators = await Promise.props(
+                _.chain(registry)
+                // Grab keys
+                    .keys()
+                    // Map to [name, stream description promise]
+                    .map(name => [name, kinesis.describeStream({StreamName: name}).promise()])
+                    // Map to [name, iterator promise]
+                    .map(([name, descP]) => {
+                        const iterP = descP.then(desc => kinesis.getShardIterator({
+                            ShardId: desc.StreamDescription.Shards[0].ShardId,
+                            ShardIteratorType: 'TRIM_HORIZON',
+                            StreamName: name
+                        }).promise());
+                        return [name, iterP];
+                    })
+                    // Back to an object
+                    .fromPairs()
+                    // Extract iterators
+                    .mapValues(iterP => iterP.then(iter => iter.ShardIterator))
+                    // Grab the value
+                    .value());
+
+            let consecutiveErrors = 0;
+            while (true) { // eslint-disable-line no-constant-condition
+                this.debug(`Polling Kinesis streams: ${JSON.stringify(_.keys(registry))}`);
+                // Repoll the streams
+                const streamResults = await KinesisConsumer._repollStreams(kinesis, streamIterators); // eslint-disable-line
+                try {
+                    await KinesisConsumer._runLambdas(streamResults, registry); // eslint-disable-line
+                } catch (err) {
+                    consecutiveErrors += 1;
+                    if (consecutiveErrors > MAX_CONSECUTIVE_ERRORS) {
+                        this.log(`Exceeded maximum number of consecutive errors (${MAX_CONSECUTIVE_ERRORS})`);
+                        throw err;
+                    }
+                    this.log(`Failed to run Lambdas with error ${err.stack}. Continuing`);
+                } finally {
+                    // Update the stream iterators
+                    streamIterators = _.mapValues(streamResults, result => result.NextShardIterator);
                 }
-                winston.error(`Failed to run Lambdas with error ${err.stack}. Continuing`);
-            } finally {
-                // Update the stream iterators
-                streamIterators = _.mapValues(streamResults, result => result.NextShardIterator);
-            }
 
-            // Wait a bit
-            await Promise.delay(config.intervalMillis); // eslint-disable-line no-await-in-loop
+                // Wait a bit
+                await Promise.delay(this.config.kinesis.intervalMillis); // eslint-disable-line no-await-in-loop
+            }
         }
     }
 }
