@@ -1,25 +1,26 @@
 {
   "name": "serverless-offline-localstack",
   "version": "0.0.1",
-  "description": "",
   "main": "./lib/index.js",
-  "scripts": {
-    "lint": "eslint .",
-    "lint-fix": "eslint . --fix",
-    "test": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
-    "build": "npm run lint && npm run test && npm run build:node",
-    "dev": "cross-env BABEL_ENV=production babel src --out-dir lib -w"
-  },
+  "keywords": [
+    "hooks",
+    "plugin",
+    "serverless",
+    "serverless-offline",
+    "localstack"
+  ],
+  "author": "Adrian Jagnanan",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/lookinglass-in/serverless-offline-localstack"
   },
-  "author": "TODO",
-  "license": "MIT",
-  "bugs": {
-    "url": "TODO"
+  "scripts": {
+    "lint": "eslint .",
+    "lintFix": "eslint . --fix",
+    "test": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
+    "build": "npm run lint && npm run test && npm run build:node",
+    "dev": "cross-env BABEL_ENV=production babel src --out-dir lib -w"
   },
-  "homepage": "TODO",
   "dependencies": {
     "babel-runtime": "6.26.0",
     "aws-sdk": "2.128.0",
@@ -41,7 +42,9 @@
     "sinon": "4.0.1",
     "serverless": "1.23.0",
     "fs-extra": "4.0.2",
-      "webpack": "3.6.0",
+    "webpack": "3.6.0",
     "webpack-node-externals": "1.6.0"
-  }
+  },
+  "license": "ISC",
+  "description": "A serverless plugin to redirected AWS requests to a running Localstack instance."
 }
