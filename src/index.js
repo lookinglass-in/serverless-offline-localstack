@@ -23,7 +23,7 @@ class ServerlessOfflineLocalstackPlugin {
                 .then(this.localstack.reconfigureAWS),
             'webpack:invoke:invoke': () => Promise.bind(this.localstack)
                 .then(this.localstack.reconfigureAWS),
-            'before:offline:start': () => Promise.resolve(
+            'before:offline:start:init': () => Promise.resolve(
                 Promise.bind(this.localstack).then(this.localstack.reconfigureAWS),
             ).then(
                 Promise.bind(this.kinesisConsumer).then(this.kinesisConsumer.runWatcher)
